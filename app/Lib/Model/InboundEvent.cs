@@ -4,14 +4,6 @@ using Newtonsoft.Json.Linq;
 
 namespace app.Lib.Model
 {
-
-    /*
-    {   
-        "type":"SuccessfulLogin","timestamp":"2021-10-22T18:02:35.242136-04:00","level":"info",
-        "extraProps":{"Country":"Canada","Email":"Brendan.Farrell@humanopen-source.net","IPV4":"228.18.14.8","IPV6":"::ffff:228.18.14.8"}
-    }
-    */
-    
     public struct InboundEvent
     {
         public string Type;
@@ -22,7 +14,7 @@ namespace app.Lib.Model
         public void Reset()
         {
             Type = "";
-            TimeStamp = DateTime.MinValue;
+            TimeStamp = default;
             Level = "";
             ExtraProps = null;
         }

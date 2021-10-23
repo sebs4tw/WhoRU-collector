@@ -22,8 +22,12 @@ namespace app
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<UnmarshallingHandler>();
-            services.AddSingleton<InMemoryAnalysisHandler>();
+            services.AddSingleton<CountryAnalysisHandler>();
+            services.AddSingleton<DifferentOriginAnalysisHandler>();
             services.AddSingleton<PersistanceHandler>();
+            
+            //temporary
+            services.AddSingleton<ISecurityEventBus,LoggerSecurityEventBus>();
 
             var inputDisruptor = new InboundDisruptorBackgroundService();
             services.AddSingleton<IInboundEventBus>(inputDisruptor);

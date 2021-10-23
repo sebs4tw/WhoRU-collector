@@ -1,1 +1,1 @@
-# placeholder
+dotnet run --project app

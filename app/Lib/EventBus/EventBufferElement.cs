@@ -9,8 +9,6 @@ namespace app.Lib.EventBus
         public bool SkipAnalysis;
         public string RawMessage;
         public InboundEvent UnmarshalledEvent = new InboundEvent();
-        public string Type;
-        public DateTime TimeStamp;
         public string Country;
         public string Email;
         public string IPV4;
@@ -22,8 +20,6 @@ namespace app.Lib.EventBus
             SkipAnalysis = false;
             UnmarshalledEvent.Reset();
             Discard = false;
-            Type = "";
-            TimeStamp = DateTime.MinValue;
             Country = "";
             Email = "";
             IPV4 = "";

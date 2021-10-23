@@ -16,3 +16,6 @@ These scripts are provided for ease of use:
 **startCollector.ps1**: starts the WhoRU-collector service.
 
 **startAlertConsumer.ps1**: starts an example alert consumer script that will output the events produced by the WhoRU-collector service. *(This script is provided for debugging purposes.)*
+
+## Run tests
+dotnet test

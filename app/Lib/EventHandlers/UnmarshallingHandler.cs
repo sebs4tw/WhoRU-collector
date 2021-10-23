@@ -4,6 +4,7 @@ using app.Lib.EventBus;
 using Newtonsoft.Json;
 using app.Lib.Model;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Converters;
 
 namespace app.Lib.EventHandlers
 {
@@ -33,7 +34,7 @@ namespace app.Lib.EventHandlers
                 data.UnmarshalledEvent = JsonConvert.DeserializeObject<InboundEvent>(data.RawMessage);
 
                 if(string.IsNullOrWhiteSpace(data.UnmarshalledEvent.Type) || 
-                    data.UnmarshalledEvent.TimeStamp == DateTime.MinValue || 
+                    data.UnmarshalledEvent.TimeStamp == default || 
                     string.IsNullOrWhiteSpace(data.UnmarshalledEvent.Level))
                 {
                     data.Discard = true;

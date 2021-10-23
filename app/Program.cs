@@ -37,10 +37,12 @@ namespace app
                         var disruptor = sp.GetService<InboundDisruptorBackgroundService>();
                         disruptor.RegisterHandlers(
                             new IEventHandler<EventBufferElement>[]{ sp.GetService<UnmarshallingHandler>()},
-                            new IEventHandler<EventBufferElement>[]{ sp.GetService<InMemoryAnalysisHandler>()},
+                            new IEventHandler<EventBufferElement>[]{ 
+                                sp.GetService<CountryAnalysisHandler>(),
+                                sp.GetService<DifferentOriginAnalysisHandler>()
+                            },
                             new IEventHandler<EventBufferElement>[]{ sp.GetService<PersistanceHandler>()}
                         );
-
                         return disruptor;
                     });
                 });
