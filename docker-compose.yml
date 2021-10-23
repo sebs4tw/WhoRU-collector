@@ -1,0 +1,15 @@
+version: "3.9"
+services:
+  timescale:
+    build: db/
+    restart: always
+    volumes:
+      - timescale_data:/var/lib/postgresql
+    environment:
+      POSTGRES_USER: dba
+      POSTGRES_PASSWORD: YR9RjWauKbBSXa2zkmKW
+      POSTGRES_DB: whoru
+    ports:
+      - 5432:5432
+volumes:
+  timescale_data:
