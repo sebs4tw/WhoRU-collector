@@ -6,8 +6,9 @@ namespace app.Lib.EventBus
     public class EventBufferElement 
     {
         public bool Discard;
+        public bool SkipAnalysis;
         public string RawMessage;
-        public InboundEvent UnmarshalledEvent;
+        public InboundEvent UnmarshalledEvent = new InboundEvent();
         public string Type;
         public DateTime TimeStamp;
         public string Country;
@@ -18,7 +19,8 @@ namespace app.Lib.EventBus
         public void Reset(string message)
         {
             RawMessage = message;
-            UnmarshalledEvent = null;
+            SkipAnalysis = false;
+            UnmarshalledEvent.Reset();
             Discard = false;
             Type = "";
             TimeStamp = DateTime.MinValue;

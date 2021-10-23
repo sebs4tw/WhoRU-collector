@@ -17,7 +17,7 @@ namespace app.Lib.EventBus
         private RingBuffer<EventBufferElement> ringBuffer;
         private bool started;
 
-        public InboundDisruptorBackgroundService(params IEventHandler<EventBufferElement>[] handlers)
+        public InboundDisruptorBackgroundService()
         {
             inputDisruptor = new Disruptor.Dsl.Disruptor<EventBufferElement>(
                 () => new EventBufferElement(),
@@ -26,8 +26,24 @@ namespace app.Lib.EventBus
                 ProducerType.Single, 
                 new BlockingSpinWaitWaitStrategy()
             );
+        }
 
-            inputDisruptor.HandleEventsWith(handlers);
+        public void RegisterHandlers(params IEventHandler<EventBufferElement>[][] handlers)
+        {
+            if(started)
+            {
+                throw new Exception("Handlers must be registered before service start.");
+            }
+
+            if(handlers.Length > 0)
+            {
+                var handlerGroup = inputDisruptor.HandleEventsWith(handlers[0]);
+
+                for(int i=1;i<handlers.Length;i++)
+                {
+                    handlerGroup = handlerGroup.Then(handlers[i]);
+                }
+            }
         }
 
         public void Dispose()

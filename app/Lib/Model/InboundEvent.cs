@@ -1,5 +1,6 @@
 using System;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace app.Lib.Model
 {
@@ -11,22 +12,19 @@ namespace app.Lib.Model
     }
     */
     
-    public class InboundEvent
+    public struct InboundEvent
     {
         public string Type;
         public DateTime TimeStamp;
         public string Level;
+        public JObject ExtraProps;
 
-        // this property will remain in serialized format since it is used as a property bag.
-        public string ExtraProps;
-    }
-
-    // this model will be used to extract some common parameters present in 'extraProps' which are relevant to the analysis process.
-    public class ExtraPropsAnalysisModel
-    {
-        public string Country;
-        public string Email;
-        public string IPV4;
-        public string IPV6;
+        public void Reset()
+        {
+            Type = "";
+            TimeStamp = DateTime.MinValue;
+            Level = "";
+            ExtraProps = null;
+        }
     }
 }

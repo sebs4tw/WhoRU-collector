@@ -4,6 +4,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using app.Lib;
 using app.Lib.EventBus;
+using app.Lib.EventHandlers;
+using Disruptor;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,14 +21,28 @@ namespace app
             CreateHostBuilder(args).Build().Run();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
+        public static IHostBuilder CreateHostBuilder(string[] args) => 
             Host.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
                 })
                 .ConfigureServices(services => {
-                    services.AddHostedService(sp => sp.GetService<InboundDisruptorBackgroundService>());
+                    services.AddHostedService(sp => {
+                        var disruptor = sp.GetService<InboundDisruptorBackgroundService>();
+                        disruptor.RegisterHandlers(
+                            new IEventHandler<EventBufferElement>[]{ sp.GetService<UnmarshallingHandler>()},
+                            new IEventHandler<EventBufferElement>[]{ sp.GetService<InMemoryAnalysisHandler>()},
+                            new IEventHandler<EventBufferElement>[]{ sp.GetService<PersistanceHandler>()}
+                        );
+
+                        return disruptor;
+                    });
                 });
     }
 }
