@@ -7,6 +7,7 @@ using app.Lib.Model;
 using System.Linq;
 using Newtonsoft.Json;
 using app.Lib.QueryRepositories;
+using app.Lib.Configuration;
 
 namespace app.Lib.EventHandlers
 {
@@ -19,13 +20,18 @@ namespace app.Lib.EventHandlers
         private readonly List<DifferentOriginAnalysisModel> eventsToAnalyze;
 
         //todo: make configurable in appSettings
-        public const int AnalysisThresholdMs = 5 * 60 * 1000;
+        public readonly uint AnalysisThresholdMs = 5 * 60 * 1000;
+        public readonly uint MaxOriginCount = 2;
 
         public DifferentOriginAnalysisHandler(
+            DifferentOriginRuleConfiguration configuration,
             LoginEventsQueryRepository eventsQueryRepository, 
             ILogger<DifferentOriginAnalysisHandler> logger, 
             ISecurityEventBus securityEventBus)
         {
+            AnalysisThresholdMs = configuration.AnalysisThresholdMs;
+            MaxOriginCount = configuration.MaxOriginCount;
+
             this.eventsQueryRepository = eventsQueryRepository;
             this.securityEventBus = securityEventBus;
             this.logger = logger;
@@ -101,7 +107,7 @@ namespace app.Lib.EventHandlers
                     }.ToTuple()
                 ));
 
-                if(origins.Count()>2)
+                if(origins.Count() > MaxOriginCount)
                 {
                     securityEvents.Add(new DifferentOriginConnectionEvent{
                         Account = ev.Account,

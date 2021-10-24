@@ -28,11 +28,11 @@ namespace app
             this.Configuration = configuration;
         }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
-        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
-        public void ConfigureServices(IServiceCollection services)
+
+        private void ConfigureFromAppSettings(IServiceCollection services)
         {
-            var connectionStringProvider = new PostgreSQLConnectionStringProvider{
+            var connectionStringProvider = new PostgreSQLConnectionStringProvider
+            {
                 DatabaseName = Configuration["TimescaleDB:DatabaseName"],
                 Port = uint.Parse(Configuration["TimescaleDB:Port"]),
                 HostName = Configuration["TimescaleDB:HostName"],
@@ -45,7 +45,8 @@ namespace app
             }
             services.AddSingleton<PostgreSQLConnectionStringProvider>(connectionStringProvider);
 
-            var rabbitMQConfig = new RabbitMQConfiguration{
+            var rabbitMQConfig = new RabbitMQConfiguration
+            {
                 HostName = Configuration["RabbitMQ:HostName"],
                 UserName = Configuration["RabbitMQ:UserName"],
                 Password = Configuration["RabbitMQ:Password"],
@@ -53,6 +54,20 @@ namespace app
                 SecurityNotificationQueueName = Configuration["RabbitMQ:SecurityNotificationQueueName"]
             };
             services.AddSingleton<RabbitMQConfiguration>(rabbitMQConfig);
+
+            var differentOriginRuleConfiguration = new DifferentOriginRuleConfiguration
+            {
+                AnalysisThresholdMs = uint.Parse(Configuration["SecurityNotificationRules:DifferentOrigin:AnalysisThresholdMs"]),
+                MaxOriginCount = uint.Parse(Configuration["SecurityNotificationRules:DifferentOrigin:MaxOriginCount"])
+            };
+            services.AddSingleton<DifferentOriginRuleConfiguration>(differentOriginRuleConfiguration);
+        }
+
+        // This method gets called by the runtime. Use this method to add services to the container.
+        // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
+        public void ConfigureServices(IServiceCollection services)
+        {
+            ConfigureFromAppSettings(services);
 
             services.AddSingleton<LoginEventsQueryRepository>();
             services.AddSingleton<UnmarshallingHandler>();
