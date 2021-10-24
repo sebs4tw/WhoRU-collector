@@ -2,20 +2,23 @@
 Advanced Homework - Respond team, by Sébastien Gagnon
 
 ## Prerequisites
-- .NET 5 SDK: https://dotnet.microsoft.com/download/dotnet/5.0 (TODO: dockerize ?)
+- .NET 5 SDK: https://dotnet.microsoft.com/download/dotnet/5.0)
 - Docker for Desktop
+- PowerShell (optional)
 
 ## How to Use
-To start the WhoRU collector service, either use the 'startCollector.ps1' script (Windows only) or start the service using 'dotnet run' from inside the App/ folder. (TODO: dockerize ?)
+To start the WhoRU collector service, either use the 'startCollector.ps1' script or start the service using 'dotnet run' from inside the App/ folder.
+
+The software dependencies (TimescaleDB and RabbitMQ) are pre-configured and can be lauched using 'docker-compose up'.
 
 ## Scripts
 These scripts are provided for ease of use:
 
-**startEventGenerator.ps1**: starts the fake-event-generator in HTTP mode.
+**startEventGenerator.ps1**: starts the fake-event-generator in HTTP mode. (Note: you must configure the path of your 'fake-event-generator' binary.)
 
-**startCollector.ps1**: starts the WhoRU-collector service.
+**startCollector.ps1**: starts the WhoRU-collector service. The collector will consume events over HTTP and output notifications to a RabbitMQ queue.
 
-**startAlertConsumer.ps1**: starts an example alert consumer script that will output the events produced by the WhoRU-collector service. *(This script is provided for debugging purposes.)*
+**startNotificatonConsumer.ps1**: starts a notification consumer script that will consume and output events from the RabbitMQ queue.
 
-## Run tests
-dotnet test
+## Running tests
+From the prompt: dotnet test

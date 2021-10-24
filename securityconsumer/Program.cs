@@ -27,8 +27,6 @@ namespace securityconsumer
                     Console.WriteLine("{0}", message);
                 };
 
-                Console.WriteLine(" Press [enter] to exit.");
-
                 channel.BasicConsume(queue: queueName,
                                     autoAck: true,
                                     consumer: consumer);
