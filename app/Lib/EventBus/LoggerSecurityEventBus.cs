@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 
 namespace app.Lib.EventBus
 {
-    // temporary , will be replaced by a 'real' implementation
+    // provided for debugging purposes
     public class LoggerSecurityEventBus : ISecurityEventBus
     {
         private readonly ILogger logger;

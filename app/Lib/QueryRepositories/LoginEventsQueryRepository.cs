@@ -5,6 +5,7 @@ using app.Lib.Model;
 using Dapper;
 using Npgsql;
 using PostgreSQLCopyHelper;
+using app.Lib.Configuration;
 
 namespace app.Lib.QueryRepositories
 {

@@ -1,7 +1,7 @@
 using Npgsql;
 using System;
 
-namespace app.Lib
+namespace app.Lib.Configuration
 {
     public class PostgreSQLConnectionStringProvider
     {

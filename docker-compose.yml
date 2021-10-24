@@ -11,5 +11,18 @@ services:
       POSTGRES_DB: whoru
     ports:
       - 5432:5432
+  rabbitmq:
+    image: rabbitmq:3.9.8-management
+    environment:
+      RABBITMQ_DEFAULT_USER: mquser
+      RABBITMQ_DEFAULT_PASS: 7BLB6qgjyrV4dIBxtk3M
+    ports:
+      - 5672:5672
+      - 15672:15672
+    volumes:
+      - mq_data:/var/lib/rabbitmq
+      - ./rabbitmq/definitions.json:/opt/definitions.json:ro
+      - ./rabbitmq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
 volumes:
   timescale_data:
+  mq_data:

@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
+using app.Lib.Configuration;
 
 namespace app
 {
@@ -42,16 +43,25 @@ namespace app
             {
                 throw new Exception("Invalid TimescaleDB configuration.");
             }
-
             services.AddSingleton<PostgreSQLConnectionStringProvider>(connectionStringProvider);
+
+            var rabbitMQConfig = new RabbitMQConfiguration{
+                HostName = Configuration["RabbitMQ:HostName"],
+                UserName = Configuration["RabbitMQ:UserName"],
+                Password = Configuration["RabbitMQ:Password"],
+                Exchange = Configuration["RabbitMQ:Exchange"],
+                SecurityNotificationQueueName = Configuration["RabbitMQ:SecurityNotificationQueueName"]
+            };
+            services.AddSingleton<RabbitMQConfiguration>(rabbitMQConfig);
+
             services.AddSingleton<LoginEventsQueryRepository>();
             services.AddSingleton<UnmarshallingHandler>();
             services.AddSingleton<CountryAnalysisHandler>();
             services.AddSingleton<DifferentOriginAnalysisHandler>();
             services.AddSingleton<PersistanceHandler>();
             
-            //temporary
-            services.AddSingleton<ISecurityEventBus,LoggerSecurityEventBus>();
+            //services.AddSingleton<ISecurityEventBus,LoggerSecurityEventBus>();
+            services.AddSingleton<ISecurityEventBus, RabbitMQSecurityEventBus>();
 
             var inputDisruptor = new InboundDisruptorBackgroundService();
             services.AddSingleton<IInboundEventBus>(inputDisruptor);
