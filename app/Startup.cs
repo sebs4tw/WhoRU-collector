@@ -21,7 +21,7 @@ namespace app
     
     public class Startup
     {
-        private IConfiguration Configuration { get; }
+        public IConfiguration Configuration { get; }
 
         public Startup(IConfiguration configuration)
         {
@@ -61,6 +61,12 @@ namespace app
                 MaxOriginCount = uint.Parse(Configuration["SecurityNotificationRules:DifferentOrigin:MaxOriginCount"])
             };
             services.AddSingleton<DifferentOriginRuleConfiguration>(differentOriginRuleConfiguration);
+
+            var countryConfig = Configuration.GetSection("SecurityNotificationRules:CountryOrigin").Get<CountryOriginRuleConfiguration>();
+            if(countryConfig==null){
+                countryConfig = new CountryOriginRuleConfiguration();
+            }
+            services.AddSingleton<CountryOriginRuleConfiguration>(countryConfig);
         }
 
         // This method gets called by the runtime. Use this method to add services to the container.

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using app.Lib.Model;
 using System.Linq;
 using Newtonsoft.Json;
+using app.Lib.Configuration;
 
 namespace app.Lib.EventHandlers
 {
@@ -14,19 +15,11 @@ namespace app.Lib.EventHandlers
         private readonly ISecurityEventBus securityEventBus;
         private readonly ILogger logger;
         private readonly List<SecurityEvent> securityEvents;
+        private readonly CountryOriginRuleConfiguration ruleConfiguration;
 
-        //todo: make configurable in appSettings
-        private static readonly HashSet<string> highRiskCountries = new HashSet<string>{
-            "China", "Cuba", "Iran", "North Korea", "Russia", "Sudan", "Syria",
-        };
-
-        //todo: make configurable in appSettings
-        private static readonly HashSet<string> whiteListCountries = new HashSet<string>{
-            "Canada", "USA"
-        };
-
-        public CountryAnalysisHandler(ILogger<CountryAnalysisHandler> logger, ISecurityEventBus securityEventBus)
+        public CountryAnalysisHandler(CountryOriginRuleConfiguration ruleConfig,ILogger<CountryAnalysisHandler> logger, ISecurityEventBus securityEventBus)
         {
+            this.ruleConfiguration = ruleConfig;
             this.securityEventBus = securityEventBus;
             this.logger = logger;
             securityEvents = new List<SecurityEvent>();
@@ -41,9 +34,9 @@ namespace app.Lib.EventHandlers
                 }
 
                 // country analysis can be performed in real-time
-                if(!whiteListCountries.Contains(data.Country))
+                if(!ruleConfiguration.Trusted.Contains(data.Country))
                 {
-                    var severity = highRiskCountries.Contains(data.Country) ? SecurityEventSeverity.HIGH : SecurityEventSeverity.LOW;
+                    var severity = ruleConfiguration.HighRisk.Contains(data.Country) ? SecurityEventSeverity.HIGH : SecurityEventSeverity.LOW;
                     securityEvents.Add(new ForeignCountryConnectionEvent{
                         EventTime = data.UnmarshalledEvent.TimeStamp,
                         Account = data.Email,

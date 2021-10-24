@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using app.Lib.EventBus;
 using System;
 using System.Linq;
+using app.Lib.Configuration;
 
 namespace tests.EventAnalysis
 {
@@ -23,7 +24,8 @@ namespace tests.EventAnalysis
         public void Setup()
         {
             var logger = new NullLogger<CountryAnalysisHandler>();
-            analysisHandler = new CountryAnalysisHandler(logger, mockSecurityBus);
+            var ruleConfig = new CountryOriginRuleConfiguration();
+            analysisHandler = new CountryAnalysisHandler(ruleConfig, logger, mockSecurityBus);
         }
 
         private SecurityEvent[] AnalyzeEvents(EventBufferElement[] events)

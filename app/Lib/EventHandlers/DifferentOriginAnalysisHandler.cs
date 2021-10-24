@@ -19,7 +19,6 @@ namespace app.Lib.EventHandlers
         private readonly List<SecurityEvent> securityEvents;
         private readonly List<DifferentOriginAnalysisModel> eventsToAnalyze;
 
-        //todo: make configurable in appSettings
         public readonly uint AnalysisThresholdMs = 5 * 60 * 1000;
         public readonly uint MaxOriginCount = 2;
 
