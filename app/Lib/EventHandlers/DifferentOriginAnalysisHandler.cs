@@ -6,11 +6,13 @@ using System.Collections.Generic;
 using app.Lib.Model;
 using System.Linq;
 using Newtonsoft.Json;
+using app.Lib.QueryRepositories;
 
 namespace app.Lib.EventHandlers
 {
     public class DifferentOriginAnalysisHandler : IEventHandler<EventBufferElement>
     {
+        private readonly LoginEventsQueryRepository eventsQueryRepository;
         private readonly ISecurityEventBus securityEventBus;
         private readonly ILogger logger;
         private readonly List<SecurityEvent> securityEvents;
@@ -19,8 +21,12 @@ namespace app.Lib.EventHandlers
         //todo: make configurable in appSettings
         public const int AnalysisThresholdMs = 5 * 60 * 1000;
 
-        public DifferentOriginAnalysisHandler(ILogger<DifferentOriginAnalysisHandler> logger, ISecurityEventBus securityEventBus)
+        public DifferentOriginAnalysisHandler(
+            LoginEventsQueryRepository eventsQueryRepository, 
+            ILogger<DifferentOriginAnalysisHandler> logger, 
+            ISecurityEventBus securityEventBus)
         {
+            this.eventsQueryRepository = eventsQueryRepository;
             this.securityEventBus = securityEventBus;
             this.logger = logger;
             eventsToAnalyze = new List<DifferentOriginAnalysisModel>();
@@ -50,7 +56,6 @@ namespace app.Lib.EventHandlers
                 if(endOfBatch)
                 {
                     AnalyzeEvents();
-                    eventsToAnalyze.Clear();
                     PublishSecurityEvents();
                 }
             }
@@ -62,10 +67,54 @@ namespace app.Lib.EventHandlers
 
         private void AnalyzeEvents()
         {
-            // read event context from the database. this is necessary to handle events which come out of sequence
-            //  and to account for clock drift between instances or service outages
+            // event context will be read from the database to support some availability edge cases.
+            //   performance could be further enhanced by implementing an in-memory cache
 
-            //todo: read persisted events
+            // this algorithm assumes that it is very unlikely that 2 events of the same account
+            //  inside the same batch will be in the same analysis threshold.
+            //  they will both be analyzed separately should this arise. 
+            var orderedEvents = eventsToAnalyze.OrderByDescending(m=>m.TimeStamp).ToArray();
+
+            foreach(var ev in orderedEvents)
+            {
+                var origins = new HashSet<Tuple<string,string,string>>(){ev.Origin.ToTuple()};
+                var lowThreshold = ev.TimeStamp.AddMilliseconds(-AnalysisThresholdMs);
+                var highThreshold = ev.TimeStamp.AddMilliseconds(AnalysisThresholdMs);
+
+                // scan for events in queue from the same account
+                origins.UnionWith(
+                    orderedEvents.Where(e=>
+                        e.Account == ev.Account && 
+                        e.TimeStamp <= highThreshold && 
+                        e.TimeStamp >= lowThreshold
+                        )
+                        .Select(e => e.Origin.ToTuple())
+                );
+
+                // scan from events in database
+                origins.UnionWith(
+                    eventsQueryRepository.ReadEventsForAnalysis(ev.Account,lowThreshold,highThreshold)
+                    .Select(o=> new Origin{
+                        Country = o.Country,
+                        IPV4 = o.IPV4,
+                        IPV6 = o.IPV6
+                    }.ToTuple()
+                ));
+
+                if(origins.Count()>2)
+                {
+                    securityEvents.Add(new DifferentOriginConnectionEvent{
+                        Account = ev.Account,
+                        EventTime = ev.TimeStamp,
+                        Level = SecurityEventSeverity.HIGH,
+                        Payload = new DifferentOriginConnectionPayload{
+                            Origins = origins.Select(t=> Origin.FromTuple(t)).ToArray() 
+                        }
+                    });
+                }
+            }
+
+            eventsToAnalyze.Clear();
         }
 
         private void PublishSecurityEvents()

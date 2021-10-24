@@ -2,14 +2,23 @@ using System;
 
 namespace app.Lib.Model
 {
-    public class Origin : IEquatable<Origin> {
+    public class Origin  {
         public string Country;
         public string IPV4;
         public string IPV6;
 
-        public bool Equals(Origin other)
+        public Tuple<string,string,string> ToTuple()
         {
-            return Country == other.Country && IPV4 == other.IPV4 && IPV6 == other.IPV6;
+            return new Tuple<string, string, string>(Country,IPV4,IPV6);
+        }
+
+        public static Origin FromTuple(Tuple<string,string,string> tuple)
+        {
+            return new Origin{
+                Country = tuple.Item1,
+                IPV4 = tuple.Item2,
+                IPV6 = tuple.Item3
+            };
         }
     }
 }

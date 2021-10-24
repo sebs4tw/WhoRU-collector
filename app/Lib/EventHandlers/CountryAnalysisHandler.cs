@@ -45,7 +45,7 @@ namespace app.Lib.EventHandlers
                 {
                     var severity = highRiskCountries.Contains(data.Country) ? SecurityEventSeverity.HIGH : SecurityEventSeverity.LOW;
                     securityEvents.Add(new ForeignCountryConnectionEvent{
-                        IncidentTime = data.UnmarshalledEvent.TimeStamp,
+                        EventTime = data.UnmarshalledEvent.TimeStamp,
                         Account = data.Email,
                         Level = severity,
                         Payload = new ForeignCountryConnectionPayload{

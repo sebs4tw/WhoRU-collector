@@ -14,11 +14,11 @@ namespace app.Lib.Model
     [JsonObject]
     public abstract class SecurityEvent
     {
-        [JsonProperty("timestamp")]
-        public DateTime Timestamp = DateTime.UtcNow;
+        [JsonProperty("analysisTime")]
+        public DateTime AnalysisTime = DateTime.UtcNow;
 
-        [JsonProperty("incidentTime")]
-        public DateTime IncidentTime;
+        [JsonProperty("eventTime")]
+        public DateTime EventTime;
 
         [JsonProperty("level")]
         [JsonConverter(typeof(StringEnumConverter))]
@@ -54,7 +54,6 @@ namespace app.Lib.Model
 
     public class DifferentOriginConnectionPayload
     {
-        public DateTime EventTimestamp;
         public Origin[] Origins;
     }
 }
