@@ -63,7 +63,8 @@ namespace app
             services.AddSingleton<DifferentOriginRuleConfiguration>(differentOriginRuleConfiguration);
 
             var countryConfig = Configuration.GetSection("SecurityNotificationRules:CountryOrigin").Get<CountryOriginRuleConfiguration>();
-            if(countryConfig==null){
+            if(countryConfig==null)
+            {
                 countryConfig = new CountryOriginRuleConfiguration();
             }
             services.AddSingleton<CountryOriginRuleConfiguration>(countryConfig);
@@ -84,7 +85,14 @@ namespace app
             //services.AddSingleton<ISecurityEventBus,LoggerSecurityEventBus>();
             services.AddSingleton<ISecurityEventBus, RabbitMQSecurityEventBus>();
 
-            var inputDisruptor = new InboundDisruptorBackgroundService();
+            var disruptorConfig = Configuration.GetSection("InboundQueue").Get<InboundDisruptorConfiguration>();
+            if(disruptorConfig ==null)
+            {
+                disruptorConfig = new InboundDisruptorConfiguration();
+            }
+            services.AddSingleton<InboundDisruptorConfiguration>(disruptorConfig);
+
+            var inputDisruptor = new InboundDisruptorBackgroundService(disruptorConfig);
             services.AddSingleton<IInboundEventBus>(inputDisruptor);
             services.AddSingleton<InboundDisruptorBackgroundService>(inputDisruptor);
         }

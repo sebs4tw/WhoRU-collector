@@ -5,23 +5,24 @@ using Disruptor;
 using Disruptor.Dsl;
 using Microsoft.Extensions.Hosting;
 using app.Lib.EventHandlers;
+using app.Lib.Configuration;
 
 namespace app.Lib.EventBus
 {
 
     public class InboundDisruptorBackgroundService : IHostedService, IDisposable, IInboundEventBus
     {
-        //todo: extract configuration
-        public const int InputRingBufferSize = 8192;
+        public readonly uint InputRingBufferSize;
         private readonly Disruptor<EventBufferElement> inputDisruptor;
         private RingBuffer<EventBufferElement> ringBuffer;
         private bool started;
 
-        public InboundDisruptorBackgroundService()
+        public InboundDisruptorBackgroundService(InboundDisruptorConfiguration configuration)
         {
+            InputRingBufferSize = configuration.RingBufferSize;
             inputDisruptor = new Disruptor.Dsl.Disruptor<EventBufferElement>(
                 () => new EventBufferElement(),
-                InputRingBufferSize,
+                (int) InputRingBufferSize,
                 TaskScheduler.Default, 
                 ProducerType.Single, 
                 new BlockingSpinWaitWaitStrategy()
